@@ -42,6 +42,8 @@ const game = (function () {
 
 	gameBoard.putMark(7, player1);
 	gameBoard.showBoard();
+
+	gameBoard.clearBoard();
 })();
 
 function createGameBoard() {
@@ -113,7 +115,7 @@ function createGameBoard() {
 		}
 	};
 
-	return { gameBoard, showBoard, putMark };
+	return { gameBoard, showBoard, putMark, clearBoard };
 }
 
 function createPlayer(name, symbol) {
