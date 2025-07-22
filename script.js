@@ -11,6 +11,7 @@ const game = (function () {
 	const gameBoard = createGameBoard(states);
 
 	const { showBoardOnDOM } = htmlDisplay(gameBoard, states);
+	showBoardOnDOM();
 })();
 
 function createGameBoard(states) {
@@ -58,6 +59,15 @@ function createGameBoard(states) {
 		return true;
 	};
 
+	const boardFull = () => {
+		for (let i = 0; i < 9; i++) {
+			if (gameBoard[i] === ".") {
+				return false;
+			}
+		}
+		return true;
+	};
+
 	const checkWin = (player) => {
 		// check rows
 		for (let i = 0; i < 9; i += 3) {
@@ -100,6 +110,11 @@ function createGameBoard(states) {
 			states.gameOver = true;
 			states.winner = player;
 			return;
+		}
+
+		if (boardFull()) {
+			console.log("Draw!");
+			states.gameOver = true;
 		}
 	};
 
