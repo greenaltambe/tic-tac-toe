@@ -7,6 +7,7 @@ const game = (function () {
 		player1: player1,
 		player2: player2,
 		winner: null,
+		winningCombination: null,
 	};
 	const gameBoard = createGameBoard(states);
 
@@ -79,6 +80,7 @@ function createGameBoard(states) {
 				console.log(`${player.name} wins!`);
 				states.gameOver = true;
 				states.winner = player;
+				states.winningCombination = [i, i + 1, i + 2];
 				return;
 			}
 		}
@@ -93,22 +95,34 @@ function createGameBoard(states) {
 				console.log(`${player.name} wins!`);
 				states.gameOver = true;
 				states.winner = player;
+				states.winningCombination = [i, i + 3, i + 6];
 				return;
 			}
 		}
 
-		// check diagonals
+		// check one diagonal
 		if (
-			(gameBoard[0] === player.symbol &&
-				gameBoard[4] === player.symbol &&
-				gameBoard[8] === player.symbol) ||
-			(gameBoard[2] === player.symbol &&
-				gameBoard[4] === player.symbol &&
-				gameBoard[6] === player.symbol)
+			gameBoard[0] === player.symbol &&
+			gameBoard[4] === player.symbol &&
+			gameBoard[8] === player.symbol
 		) {
 			console.log(`${player.name} wins!`);
 			states.gameOver = true;
 			states.winner = player;
+			states.winningCombination = [0, 4, 8];
+			return;
+		}
+
+		// check other diagonal
+		if (
+			gameBoard[2] === player.symbol &&
+			gameBoard[4] === player.symbol &&
+			gameBoard[6] === player.symbol
+		) {
+			console.log(`${player.name} wins!`);
+			states.gameOver = true;
+			states.winner = player;
+			states.winningCombination = [2, 4, 6];
 			return;
 		}
 
@@ -123,7 +137,19 @@ function createGameBoard(states) {
 
 function htmlDisplay(gameBoard, states) {
 	const cells = document.querySelectorAll(".cell");
-	const turnDiv = document.querySelector("#turn");
+	const status = document.querySelector("#status");
+	const resetButton = document.querySelector("#reset-button");
+
+	resetButton.addEventListener("click", () => {
+		if (states.winningCombination) {
+			states.winningCombination.forEach((index) => {
+				cells[index].classList.remove("winning-cell");
+			});
+		}
+		states.winningCombination = null;
+		gameBoard.clearBoard();
+		showBoardOnDOM();
+	});
 
 	cells.forEach((cell, index) => {
 		cell.addEventListener("click", () => {
@@ -133,32 +159,35 @@ function htmlDisplay(gameBoard, states) {
 
 			if (states.turn === states.player1) {
 				states.turn = states.player2;
-				turnDiv.textContent = `Turn: ${states.player2.name}`;
 			} else {
 				states.turn = states.player1;
-				turnDiv.textContent = `Turn: ${states.player1.name}`;
 			}
 			gameBoard.showBoard();
 			showBoardOnDOM();
-
-			if (states.gameOver) {
-				if (states.winner === states.player1) {
-					alert(`${states.player1.name} wins!`);
-				} else if (states.winner === states.player2) {
-					alert(`${states.player2.name} wins!`);
-				} else {
-					alert("Draw!");
-				}
-				gameBoard.clearBoard();
-				showBoardOnDOM();
-			}
 		});
 	});
 
 	const showBoardOnDOM = () => {
 		cells.forEach((cell, index) => {
-			cell.textContent = gameBoard.gameBoard[index];
+			if (gameBoard.gameBoard[index] === ".") {
+				cell.textContent = "";
+			} else {
+				cell.textContent = gameBoard.gameBoard[index];
+			}
 		});
+
+		if (states.gameOver) {
+			if (states.winner) {
+				status.textContent = `${states.winner.name} wins!`;
+				states.winningCombination.forEach((index) => {
+					cells[index].classList.add("winning-cell");
+				});
+			} else {
+				status.textContent = "Draw!";
+			}
+		} else {
+			status.textContent = `Turn: ${states.turn.name}`;
+		}
 	};
 
 	return { showBoardOnDOM };
