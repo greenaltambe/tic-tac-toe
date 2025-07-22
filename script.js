@@ -1,52 +1,19 @@
 const game = (function () {
-	const gameBoard = createGameBoard();
 	const player1 = createPlayer("player1", "X");
 	const player2 = createPlayer("player2", "O");
+	const states = {
+		turn: Math.random() < 0.5 ? player1 : player2,
+		gameOver: false,
+		player1: player1,
+		player2: player2,
+		winner: null,
+	};
+	const gameBoard = createGameBoard(states);
 
-	let turn = 0; // 0 = player1, 1 = player2
-	// for (let i = 0; i < 9; i++) {
-	// 	if (turn === 0) {
-	// 		gameBoard.putMark(i, player1);
-	// 		gameBoard.showBoard();
-	// 		if (gameBoard.checkWin(player1)) {
-	// 			break;
-	// 		}
-	// 		turn = 1;
-	// 	} else {
-	// 		gameBoard.putMark(i, player2);
-	// 		gameBoard.showBoard();
-	// 		if (gameBoard.checkWin(player2)) {
-	// 			break;
-	// 		}
-	// 		turn = 0;
-	// 	}
-	// }
-
-	gameBoard.putMark(0, player1);
-	gameBoard.showBoard();
-
-	gameBoard.putMark(2, player2);
-	gameBoard.showBoard();
-
-	gameBoard.putMark(8, player1);
-	gameBoard.showBoard();
-
-	gameBoard.putMark(4, player2);
-	gameBoard.showBoard();
-
-	gameBoard.putMark(6, player1);
-	gameBoard.showBoard();
-
-	gameBoard.putMark(3, player2);
-	gameBoard.showBoard();
-
-	gameBoard.putMark(7, player1);
-	gameBoard.showBoard();
-
-	gameBoard.clearBoard();
+	const { showBoardOnDOM } = htmlDisplay(gameBoard, states);
 })();
 
-function createGameBoard() {
+function createGameBoard(states) {
 	const gameBoard = [];
 	for (let i = 0; i < 9; i++) {
 		gameBoard.push(".");
@@ -69,11 +36,26 @@ function createGameBoard() {
 		for (let i = 0; i < 9; i++) {
 			gameBoard[i] = ".";
 		}
+
+		states.turn = Math.random() < 0.5 ? player1 : player2;
+		states.gameOver = false;
+		states.winner = null;
 	};
 
 	const putMark = (index, player) => {
+		if (states.gameOver) {
+			console.log("Game is over");
+			return false;
+		}
+
+		if (gameBoard[index] !== ".") {
+			console.log("Cell is already taken");
+			return false;
+		}
+
 		gameBoard[index] = player.symbol;
 		checkWin(player);
+		return true;
 	};
 
 	const checkWin = (player) => {
@@ -85,6 +67,8 @@ function createGameBoard() {
 				gameBoard[i + 2] === player.symbol
 			) {
 				console.log(`${player.name} wins!`);
+				states.gameOver = true;
+				states.winner = player;
 				return;
 			}
 		}
@@ -97,6 +81,8 @@ function createGameBoard() {
 				gameBoard[i + 6] === player.symbol
 			) {
 				console.log(`${player.name} wins!`);
+				states.gameOver = true;
+				states.winner = player;
 				return;
 			}
 		}
@@ -111,11 +97,41 @@ function createGameBoard() {
 				gameBoard[6] === player.symbol)
 		) {
 			console.log(`${player.name} wins!`);
+			states.gameOver = true;
+			states.winner = player;
 			return;
 		}
 	};
 
-	return { gameBoard, showBoard, putMark, clearBoard };
+	return { gameBoard, showBoard, putMark, clearBoard, checkWin };
+}
+
+function htmlDisplay(gameBoard, states) {
+	const cells = document.querySelectorAll(".cell");
+
+	cells.forEach((cell, index) => {
+		cell.addEventListener("click", () => {
+			if (!gameBoard.putMark(index, states.turn)) {
+				return;
+			}
+
+			if (states.turn === states.player1) {
+				states.turn = states.player2;
+			} else {
+				states.turn = states.player1;
+			}
+			gameBoard.showBoard();
+			showBoardOnDOM();
+		});
+	});
+
+	const showBoardOnDOM = () => {
+		cells.forEach((cell, index) => {
+			cell.textContent = gameBoard.gameBoard[index];
+		});
+	};
+
+	return { showBoardOnDOM };
 }
 
 function createPlayer(name, symbol) {
