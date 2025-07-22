@@ -1,18 +1,39 @@
 const game = (function () {
-	const player1 = createPlayer("player1", "X");
-	const player2 = createPlayer("player2", "O");
-	const states = {
-		turn: player1,
-		gameOver: false,
-		player1: player1,
-		player2: player2,
-		winner: null,
-		winningCombination: null,
-	};
-	const gameBoard = createGameBoard(states);
+	const dialog = document.querySelector("#dialog");
+	const form = dialog.querySelector("form"); // Assuming your dialog has a <form> element
 
-	const { showBoardOnDOM } = htmlDisplay(gameBoard, states);
-	showBoardOnDOM();
+	let states;
+	let gameBoard;
+	let showBoardOnDOM;
+
+	dialog.showModal();
+
+	form.addEventListener("submit", (e) => {
+		e.preventDefault();
+		const player1Name =
+			document.querySelector("#player1").value || "Player 1";
+		const player2Name =
+			document.querySelector("#player2").value || "Player 2";
+
+		const player1 = createPlayer(player1Name, "X");
+		const player2 = createPlayer(player2Name, "O");
+
+		states = {
+			turn: player1,
+			gameOver: false,
+			player1: player1,
+			player2: player2,
+			winner: null,
+			winningCombination: null,
+		};
+
+		gameBoard = createGameBoard(states);
+		const display = htmlDisplay(gameBoard, states);
+		showBoardOnDOM = display.showBoardOnDOM;
+		showBoardOnDOM();
+
+		dialog.close();
+	});
 })();
 
 function createGameBoard(states) {
