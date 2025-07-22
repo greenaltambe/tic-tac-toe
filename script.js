@@ -2,7 +2,7 @@ const game = (function () {
 	const player1 = createPlayer("player1", "X");
 	const player2 = createPlayer("player2", "O");
 	const states = {
-		turn: Math.random() < 0.5 ? player1 : player2,
+		turn: player1,
 		gameOver: false,
 		player1: player1,
 		player2: player2,
@@ -38,7 +38,7 @@ function createGameBoard(states) {
 			gameBoard[i] = ".";
 		}
 
-		states.turn = Math.random() < 0.5 ? player1 : player2;
+		states.turn = states.player1;
 		states.gameOver = false;
 		states.winner = null;
 	};
@@ -123,6 +123,7 @@ function createGameBoard(states) {
 
 function htmlDisplay(gameBoard, states) {
 	const cells = document.querySelectorAll(".cell");
+	const turnDiv = document.querySelector("#turn");
 
 	cells.forEach((cell, index) => {
 		cell.addEventListener("click", () => {
@@ -132,11 +133,25 @@ function htmlDisplay(gameBoard, states) {
 
 			if (states.turn === states.player1) {
 				states.turn = states.player2;
+				turnDiv.textContent = `Turn: ${states.player2.name}`;
 			} else {
 				states.turn = states.player1;
+				turnDiv.textContent = `Turn: ${states.player1.name}`;
 			}
 			gameBoard.showBoard();
 			showBoardOnDOM();
+
+			if (states.gameOver) {
+				if (states.winner === states.player1) {
+					alert(`${states.player1.name} wins!`);
+				} else if (states.winner === states.player2) {
+					alert(`${states.player2.name} wins!`);
+				} else {
+					alert("Draw!");
+				}
+				gameBoard.clearBoard();
+				showBoardOnDOM();
+			}
 		});
 	});
 
